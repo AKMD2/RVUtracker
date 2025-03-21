@@ -79,13 +79,13 @@ if st.session_state.log:
         st.metric(label=f"📈 Progress for {current_month}", value=f"{month_total:.2f} RVUs", delta=f"{percent:.1f}% of goal")
 
 # -----------------------------------------
-# 🧮 RVU Goal Calculator
+# 🎯 RVU Goal Calculator + Sliders
 # -----------------------------------------
-st.subheader("🧮 RVU Goal Calculator")
+st.subheader("🧮 RVU Goal Planner with Sliders")
 
 calc_goal = st.number_input("Enter RVU Goal (Weekly or Monthly)", min_value=0, value=250)
 
-st.markdown("Select procedures to build your plan:")
+st.markdown("**Select procedures and adjust sliders to build your plan:**")
 
 calc_df = rvu_df.copy()
 calc_df["Include"] = False
@@ -93,28 +93,31 @@ calc_df["Include"] = False
 for i in range(len(calc_df)):
     row = calc_df.iloc[i]
     label = f"{row['CPT']} — {row['Description']} ({row['wRVU']} wRVU)"
-    calc_df.at[i, "Include"] = st.checkbox(label, key=f"calc_{row['CPT']}")
+    calc_df.at[i, "Include"] = st.checkbox(label, key=f"slider_{row['CPT']}")
 
-# Filter selected
 selected_calc_df = calc_df[calc_df["Include"] == True]
 
 if not selected_calc_df.empty:
-    st.subheader("📈 Estimated Procedure Counts Needed")
-    target_rows = []
+    st.subheader("📈 RVU Totals Based on Your Plan")
+    slider_results = []
 
     for _, row in selected_calc_df.iterrows():
-        num_needed = int(calc_goal // row["wRVU"])
-        target_rows.append({
+        max_qty = int(calc_goal // row["wRVU"]) + 5  # Add wiggle room
+        qty = st.slider(f"{row['CPT']} — {row['Description']}", 0, max_qty, 0)
+        subtotal = qty * row["wRVU"]
+        slider_results.append({
             "CPT": row["CPT"],
             "Description": row["Description"],
+            "Qty Planned": qty,
             "wRVU per": row["wRVU"],
-            "Qty Needed": num_needed,
-            "Total RVUs": num_needed * row["wRVU"]
+            "Total RVUs": subtotal
         })
 
-    st.dataframe(pd.DataFrame(target_rows))
+    slider_df = pd.DataFrame(slider_results)
+    st.dataframe(slider_df)
 
-    total_possible = sum([r["Total RVUs"] for r in target_rows])
-    st.markdown(f"**Combined RVUs: {total_possible:.2f}** vs Target: **{calc_goal}**")
+    total_slider_rvus = slider_df["Total RVUs"].sum()
+    delta = total_slider_rvus - calc_goal
+    st.metric(label="📊 Planned Total RVUs", value=f"{total_slider_rvus:.2f}", delta=f"{delta:+.2f} from goal")
 else:
-    st.info("Select at least one procedure to calculate.")
+    st.info("Select procedures above to enable sliders.")
