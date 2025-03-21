@@ -1,0 +1,27 @@
+CPT,wRVU,Description
+99205,3.5,New Patient Level 5 (Outpatient)
+99204,2.6,New Patient Level 4 (Outpatient)
+99214,1.5,Established Patient Level 4 (Outpatient)
+99215,2.8,Established Patient Level 5 (Outpatient)
+99223,3.86,Inpatient Consult Level 5 (Initial)
+99222,2.61,Inpatient Consult Level 4 (Initial)
+99221,1.92,Inpatient Consult Level 3 (Initial)
+99233,2.0,Inpatient Follow-up Level 3
+99232,1.39,Inpatient Follow-up Level 2
+93306,1.5,Transthoracic Echo with Doppler (Imaging)
+93970,2.1,"Venous Duplex, Complete (Imaging)"
+78452,2.75,Nuclear Stress Test with Imaging & Interpretation (Imaging)
+93568,0.69,Pulmonary Angiography (Add-on) (Imaging)
+93451,1.9,Right Heart Catheterization (Cath/PCI)
+93458,5.5,Left Heart Cath with Angiography (Cath/PCI)
+93460,6.0,Combined Right and Left Heart Cath (Cath/PCI)
+92928,9.3,PCI with Stent (Non-ACS) (Cath/PCI)
+92941,10.5,PCI during Acute Coronary Syndrome (Cath/PCI)
+92924,7.09,Rotational Atherectomy (Cath/PCI)
+92933,7.53,Orbital Atherectomy (Cath/PCI)
+92975,7.28,"Mechanical Thrombectomy, Coronary (Cath/PCI)"
+92973,4.25,Intravascular Lithotripsy (Add-on) (Cath/PCI)
+33992,9.8,Impella Insertion (Cath/PCI)
+33990,6.43,IABP Insertion (Cath/PCI)
+76937,0.74,Ultrasound-Guided Vascular Access (Access)
+G0269,0.0,Vascular Closure Device Deployment (Bundled/No RVU)
