@@ -27,7 +27,6 @@ def connect_to_gsheet():
 
 worksheet = connect_to_gsheet()
 
-@st.cache_data
 def load_rvu_data():
     df = pd.read_csv("rvu_codes.csv")
     additions = {
@@ -40,7 +39,6 @@ def load_rvu_data():
     df["Display"] = df["CPT"] + " — " + df["Description"]
     return df
 
-@st.cache_data
 def load_log_data():
     rows = worksheet.get_all_records()
     df = pd.DataFrame(rows)
@@ -53,11 +51,9 @@ def save_log_entry(entries):
     df_new.fillna("", inplace=True)
     df_new["Date"] = df_new["Date"].astype(str)
 
-    # Add header if sheet is empty
     if len(worksheet.get_all_values()) == 0:
         worksheet.append_row(df_new.columns.tolist())
 
-    # Append each new row
     for _, row in df_new.iterrows():
         worksheet.append_row(row.astype(str).tolist())
 
@@ -101,9 +97,13 @@ if st.button("Log All Selected"):
     save_log_entry(new_entries)
     st.success("All procedures logged to Google Sheets!")
 
+    # 🔁 Reload data after logging
+    log_df = load_log_data()
+
 with st.expander("🎯 Monthly RVU Goal (Optional)"):
     rvu_goal = st.number_input("Set your RVU goal for the month", min_value=0, value=1000)
 
+# 🧠 Refresh user view from updated log_df
 is_admin = username.lower() == "admin"
 if is_admin and not log_df.empty and "User" in log_df.columns:
     st.warning("🔒 Admin Mode Enabled: Viewing all users’ RVUs")
