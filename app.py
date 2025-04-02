@@ -44,7 +44,7 @@ def load_rvu_data():
 def load_log_data():
     rows = worksheet.get_all_records()
     df = pd.DataFrame(rows)
-    if not df.empty:
+    if not df.empty and "Date" in df.columns:
         df["Date"] = pd.to_datetime(df["Date"])
     return df
 
@@ -98,13 +98,16 @@ with st.expander("🎯 Monthly RVU Goal (Optional)"):
     rvu_goal = st.number_input("Set your RVU goal for the month", min_value=0, value=1000)
 
 is_admin = username.lower() == "admin"
-if is_admin and not log_df.empty:
+if is_admin and not log_df.empty and "User" in log_df.columns:
     st.warning("🔒 Admin Mode Enabled: Viewing all users’ RVUs")
     user_list = sorted(log_df["User"].unique())
     selected_user = st.selectbox("Filter by user", options=["All Users"] + user_list)
     df_user = log_df.copy() if selected_user == "All Users" else log_df[log_df["User"] == selected_user]
-else:
+elif "User" in log_df.columns:
     df_user = log_df[log_df["User"] == username]
+else:
+    st.warning("⚠️ Your Google Sheet is missing the 'User' column or is empty.")
+    df_user = pd.DataFrame()
 
 if not df_user.empty:
     st.subheader("📋 RVU Log" + (" (All Users)" if is_admin else ""))
