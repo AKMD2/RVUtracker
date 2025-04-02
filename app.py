@@ -16,7 +16,7 @@ sheet_name = 'Sheet1'
 def connect_to_gsheet():
     scope = ['https://www.googleapis.com/auth/spreadsheets',
              'https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_file('creds.json', scopes=scope)
+    creds = Credentials.from_service_account_file('/mnt/data/creds.json', scopes=scope)
     spread = Spread(spreadsheet_name, sheet=sheet_name, creds=creds)
     return spread
 
