@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 import altair as alt
-import json
 from gspread_pandas import Spread
 from google.oauth2.service_account import Credentials
 
@@ -15,8 +14,8 @@ sheet_name = 'Sheet1'
 def connect_to_gsheet():
     scope = ['https://www.googleapis.com/auth/spreadsheets',
              'https://www.googleapis.com/auth/drive']
-    creds_dict = st.secrets["gspread"]
-    creds = Credentials.from_service_account_info(json.loads(json.dumps(creds_dict)), scopes=scope)
+    creds_dict = {k: v for k, v in st.secrets["gspread"].items()}
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
     spread = Spread(spreadsheet_name, sheet=sheet_name, creds=creds)
     return spread
 
