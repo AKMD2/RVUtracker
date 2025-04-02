@@ -49,13 +49,17 @@ def load_log_data():
     return df
 
 def save_log_entry(entries):
-    df = load_log_data()
-    new_df = pd.concat([df, pd.DataFrame(entries)], ignore_index=True)
-    new_df.fillna("", inplace=True)
-    if "Date" in new_df.columns:
-        new_df["Date"] = new_df["Date"].astype(str)
-    worksheet.clear()
-    worksheet.update([new_df.columns.values.tolist()] + new_df.values.tolist())
+    df_new = pd.DataFrame(entries)
+    df_new.fillna("", inplace=True)
+    df_new["Date"] = df_new["Date"].astype(str)
+
+    # Add header if sheet is empty
+    if len(worksheet.get_all_values()) == 0:
+        worksheet.append_row(df_new.columns.tolist())
+
+    # Append each new row
+    for _, row in df_new.iterrows():
+        worksheet.append_row(row.astype(str).tolist())
 
 rvu_df = load_rvu_data()
 log_df = load_log_data()
