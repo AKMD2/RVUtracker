@@ -4,25 +4,20 @@ import pandas as pd
 from datetime import date
 import altair as alt
 import gspread
-from gspread_pandas import Spread, Client, conf
+from gspread_pandas import Spread
+from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="RVU Tracker", layout="centered")
 
-# Set up connection to Google Sheets
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+# Setup connection to Google Sheets
 spreadsheet_name = 'RVU_Sheet'
-
-@st.cache_resource
-def connect_to_gsheet():
-    from gspread_pandas import Spread, Client
-from google.oauth2.service_account import Credentials
+sheet_name = 'Sheet1'
 
 def connect_to_gsheet():
-    scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_file('/mnt/data/creds.json', scopes=scope)
-    spread = Spread(spreadsheet_name, creds=creds, sheet='Sheet1')
-    return spread
-
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+             'https://www.googleapis.com/auth/drive']
+    creds = Credentials.from_service_account_file('creds.json', scopes=scope)
+    spread = Spread(spreadsheet_name, sheet=sheet_name, creds=creds)
     return spread
 
 spread = connect_to_gsheet()
@@ -49,7 +44,7 @@ def load_log_data():
 def save_log_entry(entries):
     df = load_log_data()
     new_df = pd.concat([df, pd.DataFrame(entries)], ignore_index=True)
-    spread.df_to_sheet(new_df, index=False, sheet='Sheet1', replace=True)
+    spread.df_to_sheet(new_df, index=False, sheet=sheet_name, replace=True)
 
 rvu_df = load_rvu_data()
 log_df = load_log_data()
