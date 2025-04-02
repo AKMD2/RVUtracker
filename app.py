@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 import altair as alt
-from gspread_pandas import Spread, Client
+import gspread
 from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="RVU Tracker", layout="centered")
@@ -16,11 +16,11 @@ def connect_to_gsheet():
              'https://www.googleapis.com/auth/drive']
     creds_dict = {k: v for k, v in st.secrets["gspread"].items()}
     creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-    client = Client(scope=scope, creds=creds)
-    spread = Spread(spreadsheet_name, sheet=sheet_name, client=client)
-    return spread
+    client = gspread.authorize(creds)
+    worksheet = client.open(spreadsheet_name).worksheet(sheet_name)
+    return worksheet
 
-spread = connect_to_gsheet()
+worksheet = connect_to_gsheet()
 
 @st.cache_data
 def load_rvu_data():
@@ -35,8 +35,10 @@ def load_rvu_data():
     df["Display"] = df["CPT"] + " — " + df["Description"]
     return df
 
+@st.cache_data
 def load_log_data():
-    df = spread.sheet_to_df(index=None)
+    rows = worksheet.get_all_records()
+    df = pd.DataFrame(rows)
     if not df.empty:
         df["Date"] = pd.to_datetime(df["Date"])
     return df
@@ -44,7 +46,8 @@ def load_log_data():
 def save_log_entry(entries):
     df = load_log_data()
     new_df = pd.concat([df, pd.DataFrame(entries)], ignore_index=True)
-    spread.df_to_sheet(new_df, index=False, sheet=sheet_name, replace=True)
+    worksheet.clear()
+    worksheet.update([new_df.columns.values.tolist()] + new_df.values.tolist())
 
 rvu_df = load_rvu_data()
 log_df = load_log_data()
@@ -90,7 +93,7 @@ with st.expander("🎯 Monthly RVU Goal (Optional)"):
     rvu_goal = st.number_input("Set your RVU goal for the month", min_value=0, value=1000)
 
 is_admin = username.lower() == "admin"
-if is_admin:
+if is_admin and not log_df.empty:
     st.warning("🔒 Admin Mode Enabled: Viewing all users’ RVUs")
     user_list = sorted(log_df["User"].unique())
     selected_user = st.selectbox("Filter by user", options=["All Users"] + user_list)
