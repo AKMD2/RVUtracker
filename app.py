@@ -14,7 +14,15 @@ spreadsheet_name = 'RVU_Sheet'
 
 @st.cache_resource
 def connect_to_gsheet():
-    spread = Spread(spreadsheet_name, config='/mnt/data/creds.json', sheet='Sheet1')
+    from gspread_pandas import Spread, Client
+from google.oauth2.service_account import Credentials
+
+def connect_to_gsheet():
+    scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+    creds = Credentials.from_service_account_file('/mnt/data/creds.json', scopes=scope)
+    spread = Spread(spreadsheet_name, creds=creds, sheet='Sheet1')
+    return spread
+
     return spread
 
 spread = connect_to_gsheet()
