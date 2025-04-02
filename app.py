@@ -51,6 +51,7 @@ def load_log_data():
 def save_log_entry(entries):
     df = load_log_data()
     new_df = pd.concat([df, pd.DataFrame(entries)], ignore_index=True)
+    new_df.fillna("", inplace=True)  # Prevent NaN issues when uploading
     worksheet.clear()
     worksheet.update([new_df.columns.values.tolist()] + new_df.values.tolist())
 
