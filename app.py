@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 import altair as alt
-from gspread_pandas import Spread
+from gspread_pandas import Spread, Client
 from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="RVU Tracker", layout="centered")
@@ -16,7 +16,8 @@ def connect_to_gsheet():
              'https://www.googleapis.com/auth/drive']
     creds_dict = {k: v for k, v in st.secrets["gspread"].items()}
     creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-    spread = Spread(spreadsheet_name, sheet=sheet_name, creds=creds)
+    client = Client(scope=scope, creds=creds)
+    spread = Spread(spreadsheet_name, sheet=sheet_name, client=client)
     return spread
 
 spread = connect_to_gsheet()
