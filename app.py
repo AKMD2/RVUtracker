@@ -17,8 +17,13 @@ def connect_to_gsheet():
     creds_dict = {k: v for k, v in st.secrets["gspread"].items()}
     creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
     client = gspread.authorize(creds)
-    worksheet = client.open(spreadsheet_name).worksheet(sheet_name)
-    return worksheet
+
+    try:
+        worksheet = client.open(spreadsheet_name).worksheet(sheet_name)
+        return worksheet
+    except Exception as e:
+        st.error(f"❌ Google Sheets API error: {e}")
+        st.stop()
 
 worksheet = connect_to_gsheet()
 
