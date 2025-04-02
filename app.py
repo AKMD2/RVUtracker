@@ -3,20 +3,20 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 import altair as alt
-import gspread
+import json
 from gspread_pandas import Spread
 from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="RVU Tracker", layout="centered")
 
-# Setup connection to Google Sheets
 spreadsheet_name = 'RVU_Sheet'
 sheet_name = 'Sheet1'
 
 def connect_to_gsheet():
     scope = ['https://www.googleapis.com/auth/spreadsheets',
              'https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_file('/mnt/data/creds.json', scopes=scope)
+    creds_dict = st.secrets["gspread"]
+    creds = Credentials.from_service_account_info(json.loads(json.dumps(creds_dict)), scopes=scope)
     spread = Spread(spreadsheet_name, sheet=sheet_name, creds=creds)
     return spread
 
@@ -49,13 +49,11 @@ def save_log_entry(entries):
 rvu_df = load_rvu_data()
 log_df = load_log_data()
 
-# Sidebar for user
 st.sidebar.title("👤 User")
 username = st.sidebar.text_input("Enter your name or initials", value="Anonymous")
 
 st.title("📊 RVU Tracker (Google Sheets Enabled)")
 
-# Log multiple CPTs
 st.subheader("Enter Multiple Procedures for a Single Case")
 entry_date = st.date_input("Date of Service", date.today())
 selected_displays = st.multiselect("Select CPT Code(s) + Description(s)", rvu_df["Display"])
@@ -88,11 +86,9 @@ if st.button("Log All Selected"):
     save_log_entry(new_entries)
     st.success("All procedures logged to Google Sheets!")
 
-# Optional goal
 with st.expander("🎯 Monthly RVU Goal (Optional)"):
     rvu_goal = st.number_input("Set your RVU goal for the month", min_value=0, value=1000)
 
-# Admin filter
 is_admin = username.lower() == "admin"
 if is_admin:
     st.warning("🔒 Admin Mode Enabled: Viewing all users’ RVUs")
@@ -102,7 +98,6 @@ if is_admin:
 else:
     df_user = log_df[log_df["User"] == username]
 
-# Display
 if not df_user.empty:
     st.subheader("📋 RVU Log" + (" (All Users)" if is_admin else ""))
     st.dataframe(df_user)
